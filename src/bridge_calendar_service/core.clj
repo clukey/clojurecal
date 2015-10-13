@@ -1,46 +1,47 @@
 (ns bridge-calendar-service.core
-  (:require [gapi.core :as gapi]
-            [clojure.pprint :refer :all]))
+  (:require [gapi.core :as gapi]))
 
-(def auth (gapi.auth/create-auth client-id secret "http://6e0d67fc.ngrok.io/oauthcallback"))
+(def code "code")
+(def state "state")
 
-(gapi.auth/generate-auth-url
-  auth
-  ["https://www.googleapis.com/auth/calendar"]
-  {:approval_prompt "force" :access_type "offline"})
+(def secret "secret")
+(def client-id "client-id")
+(def callback "callback-url")
+
+(def auth (gapi.auth/create-auth client-id secret callback-url))
+
+(def auth-url (gapi.auth/generate-auth-url
+                auth
+                ["https://www.googleapis.com/auth/calendar"]
+                {:approval_prompt "force" :access_type "offline"}))
 
 (gapi.auth/exchange-token auth code state)
-
 (def service (gapi/build "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"))
-(gapi/list-methods service)
 
-;; methods
-;; "calendar.events/insert"
-;; "calendar.events/patch"
-;; "calendar.events/delete"
+;; (filter #(re-matches #".*\/list" %) (gapi/list-methods service))
+;; (gapi/call auth service "calendar.calendarList/list" nil)
+;; (service "calendar.calendarList/list")
 
-(def event {:summary "watch 'the life of brian'"
-            :description "because it's sacreligious"
-            :location "defender"
-            :start {"dateTime" "2015-10-29T12:00:00-06:00"}
-            :end {"dateTime" "2015-10-29T13:00:00-06:00"}})
+(def event {:summary "weed the garden"
+            :description "just 'cause"
+            :location "my house"
+            :start {"dateTime" "2015-10-29T15:00:00-06:00"}
+            :end {"dateTime" "2015-10-29T16:00:00-06:00"}})
 
-;; insert: required params are "calendarId" and the event map
-;; udpate: required params are "calendarId", "eventId", and the event map
-;; -- "eventId" is the "id"
+(def result
+  (let [params {"calendarId" "primary"}
+        action "calendar.events/insert"]
+    (gapi/call auth service action params event)))
 
-(gapi/call auth service "calendar.events/delete" {"calendarId" "primary", "eventId" event-id} nil)
+;; be sure to add event ids from the result
+;; i.e., (result "id") ;; => "luh31f86ivk7lsodauv3aam2vo"
+(println
+  (let [params {"calendarId" "primary"
+                "eventId" "event-id"}
+        action "calendar.events/update"]
+    (gapi/call auth service action params event)))
 
-;; enrollments
-{:source :bridge
- :type :calendar
- :timestamp "2015-10-15T12:00:00-06:00"
- :event {:title "The Bridge Menace"
-         :end_date "2015-10-20T05:59:59.999Z"}}
-
-;; live training
-{:title "The Bridge Menace"
- :start_date "2015-10-15T23:59:59.999-06:00"
- :end_date "2015-10-20T23:59:59.999-06:00"
- :location "Phobos"
- :description "A new learning training system, without Jar Jar"}
+(let [params {"calendarId" "primary"
+              "eventId" "event-id"}
+      action "calendar.events/delete"]
+  (gapi/call auth service action params))

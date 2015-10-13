@@ -6,5 +6,4 @@
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [cheshire "5.5.0"]
                  [gapi "1.0.2"]
-                 [http-kit "2.1.18"]
                  [prismatic/schema "1.0.1"]])
