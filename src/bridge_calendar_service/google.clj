@@ -3,7 +3,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Sample Messages
-;; 
+;;
 ;; enrollments
 ;; {:source :bridge
 ;;  :type :calendar
@@ -31,18 +31,16 @@
 (defmulti call (fn [_ _ m] (:action m)))
 
 (defmethod call :create [auth service m]
-  (let [params {"calendarId" "primary"}
-        event (dissoc m :action)]
-    (gapi/call auth service insert params event)))
+  (let [params {"calendarId" "primary"}]
+    (gapi/call auth service insert params (:event m))))
 
 (defmethod call :update [auth service m]
   (let [params {"calendarId" "primary"
-                "eventId" "asdfadsf"}
-        event (dissoc m :action)]
-    (gapi/call auth service update params event)))
+                "eventId" (-> m :event :event-id)}
+        ]
+    (gapi/call auth service update params (:event m))))
 
 (defmethod call :delete [auth service m]
   (let [params {"calendarId" "primary"
-                "eventId" "asdfadsf"}]
-    (gapi/call auth service delete params nil)))
-
+                "eventId" (-> m :event :event-id)}]
+    (gapi/call auth service delete params)))

@@ -7,7 +7,8 @@
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [cheshire "5.5.0"]
                  [gapi "1.0.2"]
-                 [prismatic/schema "1.0.1"]]
+                 [prismatic/schema "1.0.1"]
+                 [clj-time "0.5.1"]]
 
   :profiles {:uberjar {:aot :all}
              :dev {:repl-options

@@ -1,47 +1,36 @@
 (ns bridge-calendar-service.core
-  (:require [gapi.core :as gapi]))
+  (:require [bridge-calendar-service.google :as g]
+            [clj-time.core :as time]
+            [clj-time.coerce :as tc]
+            [gapi.auth :refer [refresh-token]]
+            [gapi.core :as gapi]))
 
-(def code "code")
-(def state "state")
+(def config {:client-id "174644610201-jfee74afq6dm4nt358an0lce948b206u.apps.googleusercontent.com"
+             :secret "TWNeqONfkOS2gQ2AEV0iIHPJ"
+             :callback-url "https://6e0d67fc.ngrok.io/oauthcallback"
+             :expires 1444774535327
+             :refresh-token "1/elLntyTBJAM3-WMAlMLMuFfCPHyUJUv9bykcsXt3oZ5IgOrJDtdun6zK6XiATCKT"
+             :token "ya29.CwKrB7m2GxpsxaZCWNM7Yl5qK7EzYqvUxE6p96pg0wA0fR2Z8DzBorjOvDLE96FultkX"})
 
-(def secret "secret")
-(def client-id "client-id")
-(def callback "callback-url")
+(defn expired? [expires]
+  (<= expires (tc/to-long (time/now))))
 
-(def auth (gapi.auth/create-auth client-id secret callback-url))
+(defn get-auth
+  [{:keys [client-id secret redirect-url token refresh-token expires]}]
+  (let [auth (atom {:client_id client-id
+                    :client_secret secret
+                    :redirect_url redirect-url
+                    :token token
+                    :refresh refresh-token})]
+  (if (expired? expires)
+    (do (refresh-token auth)
+        auth)
+    auth)))
 
-(def auth-url (gapi.auth/generate-auth-url
-                auth
-                ["https://www.googleapis.com/auth/calendar"]
-                {:approval_prompt "force" :access_type "offline"}))
+(defn get-service []
+  (gapi/build "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"))
 
-(gapi.auth/exchange-token auth code state)
-(def service (gapi/build "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"))
-
-;; (filter #(re-matches #".*\/list" %) (gapi/list-methods service))
-;; (gapi/call auth service "calendar.calendarList/list" nil)
-;; (service "calendar.calendarList/list")
-
-(def event {:summary "weed the garden"
-            :description "just 'cause"
-            :location "my house"
-            :start {"dateTime" "2015-10-29T15:00:00-06:00"}
-            :end {"dateTime" "2015-10-29T16:00:00-06:00"}})
-
-(def result
-  (let [params {"calendarId" "primary"}
-        action "calendar.events/insert"]
-    (gapi/call auth service action params event)))
-
-;; be sure to add event ids from the result
-;; i.e., (result "id") ;; => "luh31f86ivk7lsodauv3aam2vo"
-(println
-  (let [params {"calendarId" "primary"
-                "eventId" "event-id"}
-        action "calendar.events/update"]
-    (gapi/call auth service action params event)))
-
-(let [params {"calendarId" "primary"
-              "eventId" "event-id"}
-      action "calendar.events/delete"]
-  (gapi/call auth service action params))
+(defn handle-message [m]
+  (let [auth (get-auth config)
+        service (get-service)]
+  (g/call auth service m)))
