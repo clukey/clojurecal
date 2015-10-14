@@ -10,7 +10,9 @@
                  [cheshire "5.5.0"]
                  [com.stuartsierra/component "0.3.0"]
                  [gapi "1.0.2"]
-                 [prismatic/schema "1.0.1"]]
+                 [prismatic/schema "1.0.1"]
+                 [amazonica "0.3.34"]
+                 [byte-streams "0.2.0"]]
 
   :profiles {:uberjar {:aot :all}
              :dev {:repl-options

@@ -8,20 +8,27 @@
     [clojure.repl :refer [apropos dir doc find-doc pst source]]
     [clojure.tools.namespace.repl :refer [refresh refresh-all]]
 
+    [amazonica.aws.kinesis :as k]
     [gapi.core :as gapi]
     [clj-time.core :as time]
     [clj-time.format :as f]
+    [byte-streams :as bs]
 
     [bridge-calendar-service.core :as c]
     [bridge-calendar-service.message-handler :as mh]
     [bridge-calendar-service.utils :as u]))
 
+(def aws-cred {:access-key "1"
+           :secret-key "2"
+           :endpoint "http://localhost:4567"})
+
 (def code "")
 (def state "")
 
-(def secret "")
-(def client-id "")
-(def callback-url "")
+(def google-config (:google (u/load-config)))
+(def secret (:secret google-config))
+(def client-id (:client-id google-config))
+(def callback-url (:callback-url google-config))
 
 (def auth (gapi.auth/create-auth client-id secret callback-url))
 
@@ -33,6 +40,15 @@
 
 (gapi.auth/exchange-token auth code state)
 (def service (gapi/build "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"))
+
+;; grab records from kinesalite
+(def records (k/get-records aws-cred
+                            :deserializer bs/to-string
+                            :shard-iterator (k/get-shard-iterator aws-cred "CalendarEvents" "shardId-000000000000" "TRIM_HORIZON")))
+
+
+;; Here's the data
+(map :data (:records records))
 
 ;; (filter #(re-matches #".*\/list" %) (gapi/list-methods service))
 ;; (gapi/call auth service "calendar.calendarList/list" nil)
