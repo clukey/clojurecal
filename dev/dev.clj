@@ -14,6 +14,8 @@
     [clj-time.format :as f]
     [byte-streams :as bs]
 
+    [cheshire.core :as cheshire]
+
     [bridge-calendar-service.core :as c]
     [bridge-calendar-service.message-handler :as mh]
     [bridge-calendar-service.utils :as u]))
