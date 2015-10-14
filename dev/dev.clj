@@ -12,16 +12,24 @@
     [clj-time.core :as time]
     [clj-time.format :as f]
 
+    [cheshire.core :as cheshire]
+
     [bridge-calendar-service.core :as c]
     [bridge-calendar-service.message-handler :as mh]
     [bridge-calendar-service.utils :as u]))
 
+(def google-details
+  (as-> "resources/client-details.json" <>
+      (slurp <>)
+      (cheshire/parse-string <> (fn [i] (keyword i)))
+      (:google <>)))
+
 (def code "")
 (def state "")
 
-(def secret "")
-(def client-id "")
-(def callback-url "")
+(def secret (:secret google-details))
+(def client-id (:client-id google-details))
+(def callback-url (:callback-url google-details))
 
 (def auth (gapi.auth/create-auth client-id secret callback-url))
 
