@@ -1,4 +1,4 @@
-(ns bridge-calendar-service.apis.office365
+(ns bridge-calendar-service.office365
   (:require [gapi.core :as gapi]))
 
 (defmulti call (fn [_ _ m] (:action m)))

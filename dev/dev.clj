@@ -16,13 +16,12 @@
 
     [cheshire.core :as cheshire]
 
-    [bridge-calendar-service.core :as c]
     [bridge-calendar-service.message-handler :as mh]
     [bridge-calendar-service.utils :as u]))
 
 (def aws-cred {:access-key "1"
-           :secret-key "2"
-           :endpoint "http://localhost:4567"})
+               :secret-key "2"
+               :endpoint "http://localhost:4567"})
 
 (def code "")
 (def state "")
@@ -40,17 +39,18 @@
                 :access_type "offline"}]
     (gapi.auth/generate-auth-url auth scope params)))
 
-(gapi.auth/exchange-token auth code state)
-(def service (gapi/build "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"))
+;; (gapi.auth/exchange-token auth code state)
+;; (def service (gapi/build "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"))
 
-;; grab records from kinesalite
-(def records (k/get-records aws-cred
-                            :deserializer bs/to-string
-                            :shard-iterator (k/get-shard-iterator aws-cred "CalendarEvents" "shardId-000000000000" "TRIM_HORIZON")))
-
+;; ;; grab records from kinesalite
+;; (def msg
+;;   (let [shard-iterator (k/get-shard-iterator aws-cred "CalendarEvents" "shardId-000000000000" "TRIM_HORIZON")]
+;;     (k/get-records aws-cred
+;;       :deserializer bs/to-string
+;;       :shard-iterator shard-iterator)))
 
 ;; Here's the data
-(map :data (:records records))
+;; (map :data (:records msg))
 
 ;; (filter #(re-matches #".*\/list" %) (gapi/list-methods service))
 ;; (gapi/call auth service "calendar.calendarList/list" nil)

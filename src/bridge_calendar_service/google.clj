@@ -1,4 +1,4 @@
-(ns bridge-calendar-service.apis.google
+(ns bridge-calendar-service.google
   (:require [clj-time.core :as time]
             [clj-time.coerce :as tc]
             [gapi.core :as gapi]

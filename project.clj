@@ -6,7 +6,9 @@
 
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [clj-time "0.5.1"]
-
+                 [com.amazonaws/aws-lambda-java-core "1.0.0"]
+                 [com.amazonaws/aws-lambda-java-events "1.0.0"]
+                 
                  [cheshire "5.5.0"]
                  [com.stuartsierra/component "0.3.0"]
                  [gapi "1.0.2"]
